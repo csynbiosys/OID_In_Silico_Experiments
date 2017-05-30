@@ -1,7 +1,0 @@
-Reference to non-existent field 'rel_conf_interval'.
-
-Error in gal1_in_silico_loop (line 285)
-        fprintf(fid,'ITERATION %d REL_CONF %s %f\n',  i, used_par_names(j,:), results.fit.rel_conf_interval(j));
-
-Error in run_in_silico_experiment (line 16)
-        gal1_in_silico_loop;
