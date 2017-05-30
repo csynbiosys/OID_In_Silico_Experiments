@@ -23,12 +23,12 @@ Several different approaches to designing the experiment input where tried.  The
 
 The experiment code is in github: https://github.com/csynbiosys/AMIGO2R2016b
 
-To run an experiment clone the repository, checkout the appropriate branch then go to AMIGO2R2016b/Examples/In_Silico_Loop/ and 
+To run an experiment clone the repository, checkout the appropriate branch then go to `AMIGO2R2016b/Examples/In_Silico_Loop` and 
 a run command such as
 ```
 matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
 ```
-This will execute 20 runs of the experiment for each run output files called FooBar-n.dat and FooBar-n.mat. 
+This will execute 20 runs of the experiment for each run output files called `FooBar-n.dat` and `FooBar-n.mat`. 
 
 The github commit version used were:
 
@@ -62,13 +62,13 @@ The experiments executed were:
 | 15 | 4 | Experiment-Gungi |
 | 20 | 3 | Experiment-Gungi |
 
-To run the experiment in the Experiment-Gungi branch, checkout the branch and then go to AMIGO2R2016b/Examples/In_Silico_Loop/ and run a command such as
+To run the experiment in the `Experiment-Gungi` branch, checkout the branch and then go to `AMIGO2R2016b/Examples/In_Silico_Loop` and run a command such as
 ```
 matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',5,20); quit;"
 ```
 This will execte 20 runs of the 5-loops experiments.
 
-To run the 8-loop experiment in the Experiment-BB8 brach, checkout the branch then go to AMIGO2R2016b/Examples/In_Silico_Loop/ and run a command such as
+To run the 8-loop experiment in the Experiment-BB8 brach, checkout the branch then go to `AMIGO2R2016b/Examples/In_Silico_Loop` and run a command such as
 ```
 matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
 ```
@@ -78,9 +78,9 @@ Note that these scripts seem to take up more and more memory as they run and thi
 
 ## Data and processing scripts
 
-The data files are in the data directory. Additional runs that have not been included in these results (because I wanted
-all approachs to have 30 runs) are in the data/notUsed directory.
+The data files are in the `data` directory. Additional runs that have not been included in these results (because I wanted
+all approachs to have 30 runs) are in the `data/notUsed` directory.
 
-There are two data processing scripts.  These use R and the knitr package. Both scripts are in the src directory.
+There are two data processing scripts.  These use R and the knitr package. Both scripts are in the `src` directory.
 
 
