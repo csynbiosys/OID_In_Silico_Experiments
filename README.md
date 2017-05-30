@@ -45,6 +45,37 @@ The github commit version used were:
 
 ## How many loops of OID are optimal for a 60 hour experiment?
 
+Here we varied how many OID loops we execute in the 60 hours. For example, are 2 executions of OID each planning the input for 30 hours better or worse than, say, 30 executions of OID each planning for 2 hours.
+
+The experiments executed were:
+
+| Number of loops |  Duration of each OID input (hours) | Github branch |
+|-----------------|-----------------------------|---------------|
+| 2 | 30 | Experiment-Gungi |
+| 3 | 20 | Experiment-Gungi |
+| 4 | 15 | Experiment-Gungi |
+| 5 | 12 | Experiment-Gungi |
+| 6 | 10 | Experiment-Gungi |
+| 8 | 4x8 and 4x7 | Experiment-BB8 |
+| 10 | 6 | Experiment-Gungi |
+| 12 | 5 | Experiment-Gungi |
+| 15 | 4 | Experiment-Gungi |
+| 20 | 3 | Experiment-Gungi |
+
+To run the experiment in the Experiment-Gungi branch, checkout the branch and then go to AMIGO2R2016b/Examples/In_Silico_Loop/ and run a command such as
+```
+matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',5,20); quit;"
+```
+This will execte 20 runs of the 5-loops experiments.
+
+To run the 8-loop experiment in the Experiment-BB8 brach, checkout the branch then go to AMIGO2R2016b/Examples/In_Silico_Loop/ and run a command such as
+```
+matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
+```
+This will execte 20 runs of the 8-loops experiments.
+
+Note that these scripts seem to take up more and more memory as they run and this can cause them to slow down considerably. I prevent that in the final execution I always executed just two or three runs at a time then executed more with another matlab invocation. The `-wait` flag was very useful here to prevent the command line from terminating until all the runs had been executed.
+
 ## Data and processing scripts
 
 The data files are in the data directory. Additional runs that have not been included in these results (because I wanted
