@@ -1,0 +1,152 @@
+---
+title: "Optimal number of OID loops"
+author: "Ally Hume"
+date: "30 May 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Description
+
+TODO: Describe what is going on here
+
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(knitr)
+
+trueValues = data.frame( param=c("alpha1","Vm1","h1","Km1","d1","alpha2","d2","Kf","Kb"),
+                         trueValue=c(3.3120e-05,0.0414,    1.89,   0.0368, 0.03,   0.01,   0.0100, 0.002, 0.0023) )
+
+load_experiment_data <- function(filename) {
+  
+  wholeFile <- readLines(filename)
+  iterationData <- wholeFile[grep('HOUR',wholeFile)]
+  iterationData <- iterationData[grep('PARAM_FIT|REL_CONF',iterationData)]
+  con <- textConnection(iterationData)
+  data <- read.table(con)
+  close(con)
+  
+  colnames(data) <- c("key", "hour", "type", "param", "value")
+  
+  data <- data %>% mutate( runName = gsub('.dat','',filename))
+  numLoops <- filename
+  numLoops <- gsub('-2_loops',    '#2@',    numLoops)
+  numLoops <- gsub('-3_loops',    '#3@',    numLoops)
+  numLoops <- gsub('-4_loops',    '#4@',    numLoops)
+  numLoops <- gsub('-5_loops',    '#5@',    numLoops)
+  numLoops <- gsub('-6_loops',    '#6@',    numLoops)
+  numLoops <- gsub('-8_loops',    '#8@',    numLoops)
+  numLoops <- gsub('-10_loops',    '#10@',    numLoops)
+  numLoops <- gsub('-12_loops',    '#12@',    numLoops)
+  numLoops <- gsub('-15_loops',    '#15@',    numLoops)
+  numLoops <- gsub('-20_loops',    '#20@',    numLoops)
+
+  data <- data %>% mutate( numLoops = gsub('.*#','',numLoops))
+  data <- data %>% mutate( numLoops = gsub('@.*','',numLoops))
+
+  return(data)
+}
+```
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+# Get the data files.
+files <- c(list.files(pattern='Gungi.*dat'),list.files(pattern='BB8.*dat'))
+
+# Read in each file, convert to a data frame and merge into one dataframe
+data <- lapply(files, load_experiment_data)
+data <- Reduce(function(...) merge(..., all=T), data)
+
+# Join data with true values
+data <- left_join(data,trueValues)
+
+data$numLoops <- factor(data$numLoops, levels = c('2','3','4','5','6','8','10','12','15','20'))
+data$hour <- factor(data$hour)
+```
+
+## Number of runs
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'alpha1')
+d <- d %>% group_by(numLoops) %>% summarise(n=n())
+kable(d)
+```
+
+## Fitted parameter values after final hour 
+
+The final fitted parameters for each method after 60 hours of experiment.
+
+TODO: The y-axis for some of these need not values.
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 ) %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() +
+  geom_hline(aes(yintercept=trueValue), color='red')
+```
+
+## Relative confidence intervals after the final hour
+  
+Relative confidence intervals for each parameter by experiment. 
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0) %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() 
+```
+
+## Normalised squared error over all parameters except alpha
+
+Dividing the estimated parameter value by the true parameter value, summing the squared errors and then dividing by the number of data points gives the following graphs for each parameter.
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param != 'alpha1') %>% 
+     select(numLoops, param, trueValue, value) %>%
+     mutate(normValue=value/trueValue) %>%
+     mutate(squaredError=(normValue-value)^2) %>% 
+     group_by(param,numLoops) %>%
+     summarize(error=sum(squaredError)/n())
+
+ggplot(data=d, aes(x=numLoops,y=error,group=1)) + 
+  geom_line() + facet_wrap( ~ param, scales = "free_y") 
+```
+
+Combining these into a single graph (just using addition) gives:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param != 'alpha1') %>% 
+     select(numLoops, param, trueValue, value) %>%
+     mutate(normValue=value/trueValue) %>%
+     mutate(squaredError=(normValue-value)^2) %>% 
+     group_by(numLoops) %>%
+     summarize(error=sum(squaredError)/n())
+
+ggplot(data=d, aes(x=numLoops,y=error,group=1)) + geom_line()  
+```
+
+This is not the U-shaped curve we had expected to see.
+
+
+
+
+
+## Code and data
+
+TODO: Add references to the source code and the data.
+
+All experiments are in git repository: git@github.com:csynbiosys/AMIGO2R2016b.git
+
+The random experiment is branch Experiment-Ventress commit 7227eaa63069ff921a48764fa8bd12dc6e2a2ec3.
+
+The OID experiment is branch Experiment-CadBane commit f475047ece093b66ed23b66b701dd6565cfa6c69.
+
+
