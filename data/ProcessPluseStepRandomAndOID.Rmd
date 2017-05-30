@@ -1,0 +1,174 @@
+---
+title: "Comparison of means of creating the experiment input"
+author: "Ally Hume"
+date: "30 May 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Description
+
+Comparing various means of creating inputs for 60 hours of gal1 experiment:
+
+TODO: Describe the experiments better with a table
+
+- Random galactose value (between 0 and 2) for each period of 60 mins
+- Optimally choses galactose value for each period 60 mins - whole input designed in advance before experiment starts to run.
+- Optimally choses galactose value for each period 60 mins - whole input designed in advance before experiment starts to run. This time using log transform for all parameters other than h1.
+- Designed - 61 steps from 0 up to 2 and back down again.
+
+In each run the initial conditions are randomly chosen in the range 0.1 x truth to 10 x truth. The random distribution is an even distribution in the log scale, so half the distribution is in range [truth .. 10 x truth] and half in the range [0.1 x truth .. truth].
+
+TODO: Put in some example inputs.
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(knitr)
+
+trueValues = data.frame( param=c("alpha1","Vm1","h1","Km1","d1","alpha2","d2","Kf","Kb"),
+                         trueValue=c(3.3120e-05,0.0414,    1.89,   0.0368, 0.03,   0.01,   0.0100, 0.002, 0.0023) )
+
+load_experiment_data <- function(filename) {
+  
+  wholeFile <- readLines(filename)
+  iterationData <- wholeFile[grep('HOUR',wholeFile)]
+  iterationData <- iterationData[grep('PARAM_FIT|REL_CONF',iterationData)]
+  con <- textConnection(iterationData)
+  data <- read.table(con)
+  close(con)
+  
+  colnames(data) <- c("key", "hour", "type", "param", "value")
+  
+  data <- data %>% mutate( runName = gsub('.dat','',filename))
+  exptName <- filename
+  exptName <- gsub('CadBane',      'O',    exptName)
+  exptName <- gsub('Ventress',     'R',    exptName)
+  exptName <- gsub('Biggs',        'D61',  exptName)
+  exptName <- gsub('Lobot',        'D13',  exptName)
+  exptName <- gsub('MazKanata',    'P',    exptName)
+  exptName <- gsub('Phasma',       'S1',   exptName)
+  exptName <- gsub('Hondo',        'S6',   exptName)
+  
+  filename <- gsub('CadBane-',     'OID 1 Loop (CadBane)-', filename)
+  filename <- gsub('Ventress',     'Random (Ventress)',     filename)
+  filename <- gsub('Biggs',        'Designed 61 (Biggs)',   filename)
+  filename <- gsub('Lobot',        'Designed 13 (Lobot)',   filename)
+  filename <- gsub('MazKanata',    'Pulse  (MaxKanata)',    filename)
+  filename <- gsub('Phasma',       'Steps 1 hour (Phasma)', filename)
+  filename <- gsub('Hondo',        'Steps 6 hour (Hondo)',  filename)
+  data <- data %>% mutate( exptName = gsub('-.*','',exptName))
+  data <- data %>% mutate( exptLabel = gsub('-.*','',filename))
+  
+  return(data)
+}
+```
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+# Get the data files.
+files <- c(list.files(pattern='CadBane.*dat'),list.files(pattern='Ventress.*dat'),list.files(pattern='Biggs.*dat'),list.files(pattern='Lobot.*dat'),list.files(pattern='MazKanata.*dat'),list.files(pattern='Phasma.*dat'),list.files(pattern='Hondo.*dat'))
+
+# Read in each file, convert to a data frame and merge into one dataframe
+data <- lapply(files, load_experiment_data)
+data <- Reduce(function(...) merge(..., all=T), data)
+
+# Join data with true values
+data <- left_join(data,trueValues)
+
+# Specify the order of the experiment names
+data$exptName <- factor(data$exptName, levels = c('O','R','D13','D61','P','S6','S1'))
+data$hour <- factor(data$hour)
+```
+
+## Number of runs
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'alpha1')
+d <- d %>% group_by(exptName,exptLabel) %>% summarise(n=n())
+kable(d)
+```
+
+## Fitted parameter values after final hour 
+
+The final fitted parameters for each method after 60 hours of experiment.
+
+TODO: The y-axis for some of these need not values.
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 ) %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() +
+  geom_hline(aes(yintercept=trueValue), color='red')
+```
+Optimal Input Design (OID) is the best overall.
+
+Focusing on just OID and Random to zoom in a little more:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & exptName %in% c('O','R')) %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") +
+  geom_hline(aes(yintercept=trueValue), color='red')
+```
+
+
+
+## Convergence of OID method
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & exptName == 'O' ) %>% 
+     select(hour, param, trueValue, value) 
+
+ggplot(data=d, aes(x=hour,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() +
+  geom_hline(aes(yintercept=trueValue), color='red')
+```
+
+## Relative confidence intervals after the final hour
+  
+Relative confidence intervals for each parameter by experiment.  We have to be a little careful about these numbers because sometimes they are not produced and sometimes they are zero (which seems incorrect).  The data used to produce these is:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0)
+d <- d %>% group_by(exptName,exptLabel,param) %>% summarise(n=n())
+kable(d)
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0) %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() 
+```
+
+Focusing on just OID to zoom in a little more:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0 & exptName == 'O') %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y")
+```
+
+
+## Code and data
+
+TODO: Add references to the source code and the data.
+
+All experiments are in git repository: git@github.com:csynbiosys/AMIGO2R2016b.git
+
+The random experiment is branch Experiment-Ventress commit 7227eaa63069ff921a48764fa8bd12dc6e2a2ec3.
+
+The OID experiment is branch Experiment-CadBane commit f475047ece093b66ed23b66b701dd6565cfa6c69.
+
+
