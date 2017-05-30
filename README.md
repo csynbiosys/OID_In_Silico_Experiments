@@ -23,11 +23,23 @@ Several different approaches to designing the experiment input where tried.  The
 
 The experiment code is in github: https://github.com/csynbiosys/AMIGO2R2016b
 
-To run an experiment go to AMIGO2R2016b/Examples/In_Silico_Loop/ and run command such as
+To run an experiment clone the repository, checkout the appropriate branch then go to AMIGO2R2016b/Examples/In_Silico_Loop/ and 
+a run command such as
 ```
 matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
 ```
 This will execute 20 runs of the experiment for each run output files called FooBar-*.dat and FooBar-*.mat. 
+
+The github commit version used were:
+| Branch name |  Version|
+|-------------|---------|
+| Experiment-CadBane   |  fc25742547975bcbae60d1683428fa048ebaea5  |
+| Experiment-Ventress  |  5af21b6ed4ec07c32cea1b1d2f79afc5e0697123 |
+| Experiment-Biggs     | 27141c2d65942aef7f5ed7c078fdafe5e897e105  |
+| Experiment-MazKanata |  31b15e633a8f2a65966be1b53287cee0351d8c70 |
+| Experiment-Lobot     | 6dfa7704c2fba572e75ed64be22ed80d0276c95d  |
+| Experiment-Hondo     |  45b477e8cb20597e5f34501ee25458b99bf41c58 |
+| Experiment-Phasma    |  22149e39961806e5ad1aeb863690cfa1454dc08e |
 
 
 ## How many loops of OID are optimal for a 60 hour experiment?
