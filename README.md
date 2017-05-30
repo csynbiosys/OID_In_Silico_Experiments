@@ -30,7 +30,7 @@ matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
 ```
 This will execute 20 runs of the experiment for each run output files called `FooBar-n.dat` and `FooBar-n.mat`. 
 
-The github commit version used were:
+The github commit versions used were:
 
 | Branch name |  Version|
 |-------------|---------|
@@ -75,6 +75,14 @@ matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
 This will execte 20 runs of the 8-loops experiments.
 
 Note that these scripts seem to take up more and more memory as they run and this can cause them to slow down considerably. I prevent that in the final execution I always executed just two or three runs at a time then executed more with another matlab invocation. The `-wait` flag was very useful here to prevent the command line from terminating until all the runs had been executed.
+
+The github commit versions used were:
+
+| Branch name |  Version|
+|-------------|---------|
+| Experiment-Gungi  |  bb42b49df1cb5efd2b9286ae6c24edd485823ff7  |
+| Experiment-BB8    |  df49044ac80804c67f745ed3603f623f05300265  |
+
 
 ## Data and processing scripts
 
