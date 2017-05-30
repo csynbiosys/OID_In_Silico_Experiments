@@ -28,9 +28,10 @@ a run command such as
 ```
 matlab -nodesktop -nosplash -r "run_in_silico_experiment('FooBar',20); quit;"
 ```
-This will execute 20 runs of the experiment for each run output files called FooBar-*.dat and FooBar-*.mat. 
+This will execute 20 runs of the experiment for each run output files called FooBar-n.dat and FooBar-n.mat. 
 
 The github commit version used were:
+
 | Branch name |  Version|
 |-------------|---------|
 | Experiment-CadBane   |  fc25742547975bcbae60d1683428fa048ebaea5  |
