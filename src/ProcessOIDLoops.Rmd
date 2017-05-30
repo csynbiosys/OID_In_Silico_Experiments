@@ -11,7 +11,21 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Description
 
-TODO: Describe what is going on here
+In this analysis we explore the optimal number of OID loops to execute within a 60 hour experiment.  The options explored are:
+
+| Number of loops |  Duration of each OID input (hours) | 
+|-----------------|-----------------------------|
+| 1 | 60 | 
+| 2 | 30 |
+| 3 | 20 |
+| 4 | 15 | 
+| 5 | 12 |
+| 6 | 10 |
+| 8 | 4x8 and 4x7 |
+| 10 | 6 | 
+| 12 | 5 |
+| 15 | 4 | 
+| 20 | 3 | 
 
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
@@ -36,16 +50,17 @@ load_experiment_data <- function(filename) {
   
   data <- data %>% mutate( runName = gsub('.dat','',filename))
   numLoops <- filename
+  numLoops <- gsub('CadBane',     '#1@',   numLoops)
   numLoops <- gsub('-2_loops',    '#2@',    numLoops)
   numLoops <- gsub('-3_loops',    '#3@',    numLoops)
   numLoops <- gsub('-4_loops',    '#4@',    numLoops)
   numLoops <- gsub('-5_loops',    '#5@',    numLoops)
   numLoops <- gsub('-6_loops',    '#6@',    numLoops)
   numLoops <- gsub('-8_loops',    '#8@',    numLoops)
-  numLoops <- gsub('-10_loops',    '#10@',    numLoops)
-  numLoops <- gsub('-12_loops',    '#12@',    numLoops)
-  numLoops <- gsub('-15_loops',    '#15@',    numLoops)
-  numLoops <- gsub('-20_loops',    '#20@',    numLoops)
+  numLoops <- gsub('-10_loops',   '#10@',   numLoops)
+  numLoops <- gsub('-12_loops',   '#12@',   numLoops)
+  numLoops <- gsub('-15_loops',   '#15@',   numLoops)
+  numLoops <- gsub('-20_loops',   '#20@',   numLoops)
 
   data <- data %>% mutate( numLoops = gsub('.*#','',numLoops))
   data <- data %>% mutate( numLoops = gsub('@.*','',numLoops))
@@ -56,7 +71,9 @@ load_experiment_data <- function(filename) {
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 # Get the data files.
-files <- c(list.files(pattern='Gungi.*dat'),list.files(pattern='BB8.*dat'))
+files <- c(list.files(path='../data',pattern='Gungi.*dat',full.names = TRUE),
+           list.files(path='../data',pattern='BB8.*dat',full.names = TRUE),
+           list.files(path='../data',pattern='CadBane.*dat',full.names = TRUE))
 
 # Read in each file, convert to a data frame and merge into one dataframe
 data <- lapply(files, load_experiment_data)
@@ -65,7 +82,7 @@ data <- Reduce(function(...) merge(..., all=T), data)
 # Join data with true values
 data <- left_join(data,trueValues)
 
-data$numLoops <- factor(data$numLoops, levels = c('2','3','4','5','6','8','10','12','15','20'))
+data$numLoops <- factor(data$numLoops, levels = c('1','2','3','4','5','6','8','10','12','15','20'))
 data$hour <- factor(data$hour)
 ```
 
@@ -106,7 +123,7 @@ ggplot(data=d, aes(x=numLoops,y=value)) +
 
 ## Normalised squared error over all parameters except alpha
 
-Dividing the estimated parameter value by the true parameter value, summing the squared errors and then dividing by the number of data points gives the following graphs for each parameter.
+Dividing the estimated parameter value by the true parameter value, summing the squared errors and then dividing by the number of data points gives the following graphs for each parameter (ignoring alpha1):
 
 ```{r echo=FALSE}
 d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param != 'alpha1') %>% 
@@ -137,16 +154,10 @@ This is not the U-shaped curve we had expected to see.
 
 
 
+## GitHub
 
+The github repository containing the data and the processing files is:
+* `https://github.com/csynbiosys/OID_In_Silico_Experiments`
 
-## Code and data
-
-TODO: Add references to the source code and the data.
-
-All experiments are in git repository: git@github.com:csynbiosys/AMIGO2R2016b.git
-
-The random experiment is branch Experiment-Ventress commit 7227eaa63069ff921a48764fa8bd12dc6e2a2ec3.
-
-The OID experiment is branch Experiment-CadBane commit f475047ece093b66ed23b66b701dd6565cfa6c69.
 
 
