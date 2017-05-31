@@ -89,6 +89,8 @@ The github commit versions used were:
 The data files are in the `data` directory. Additional runs that have not been included in these results (because I wanted
 all approachs to have 30 runs) are in the `data/notUsed` directory.
 
+The example input data can be found in the 'data/exampleInputs' directory.
+
 There are two data processing scripts.  These use R and the knitr package. Both scripts are in the `src` directory.
 
 
