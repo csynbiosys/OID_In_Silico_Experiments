@@ -98,8 +98,6 @@ kable(d)
 
 The final fitted parameters for each method after 60 hours of experiment.
 
-TODO: The y-axis for some of these need not values.
-
 ```{r echo=FALSE}
 d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 ) %>% 
      select(numLoops, param, trueValue, value) 
@@ -107,6 +105,58 @@ d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 ) %>%
 ggplot(data=d, aes(x=numLoops,y=value)) + 
   geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() +
   geom_hline(aes(yintercept=trueValue), color='red')
+```
+
+The y-axis are poorly labelled so here we plot each parameter individually so we get better control over the axis labelling:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'alpha1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10() +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("alpha1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'd1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=c(0.02,0.03,0.04)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("d1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'h1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(1.2,2.6,0.2)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("h1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'Km1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0.01,0.05,0.01)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("Km1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'Vm1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0.02,0.10,0.005)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("Vm1: Final fitted values")
 ```
 
 ## Relative confidence intervals after the final hour
@@ -120,6 +170,54 @@ d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0) %>%
 ggplot(data=d, aes(x=numLoops,y=value)) + 
   geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() 
 ```
+
+The y-axis are poorly labelled so here we plot each parameter individually so we get better control over the axis labelling:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0 & param == 'alpha1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=c(100,1000,10000,100000)) +
+  ggtitle("alpha1: Final relative confidence")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0 & param == 'd1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0,100,10)) +
+  ggtitle("alpha1: Final relative confidence")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0 & param == 'h1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0,100,10)) +
+  ggtitle("h1: Final relative confidence")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0 & param == 'Km1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0,100,10)) +
+  ggtitle("Km1: Final relative confidence")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'REL_CONF' & hour == 60 & value > 0 & param == 'Vm1') %>% 
+     select(numLoops, param, trueValue, value) 
+
+ggplot(data=d, aes(x=numLoops,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0,100,10)) +
+  ggtitle("Vm1: Final relative confidence")
+```
+
 
 ## Normalised squared error over all parameters except alpha
 
@@ -150,14 +248,16 @@ d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param != 'alpha1') %>%
 ggplot(data=d, aes(x=numLoops,y=error,group=1)) + geom_line()  
 ```
 
-This is not the U-shaped curve we had expected to see.
-
-
 
 ## GitHub
 
 The github repository containing the data and the processing files is:
+
 * `https://github.com/csynbiosys/OID_In_Silico_Experiments`
+
+The `README.md` file in that repository also contains references to the git repositories 
+and versions of the code used to produce the data.
+
 
 
 

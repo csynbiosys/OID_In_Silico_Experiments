@@ -13,22 +13,57 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Comparing various means of creating inputs for 60 hours of gal1 experiment:
 
-TODO: Describe the experiments better with a table
+Several different approaches to designing the experiment input where tried. These are described in the table below:
 
-- Random galactose value (between 0 and 2) for each period of 60 mins
-- Optimally choses galactose value for each period 60 mins - whole input designed in advance before experiment starts to run.
-- Optimally choses galactose value for each period 60 mins - whole input designed in advance before experiment starts to run. This time using log transform for all parameters other than h1.
-- Designed - 61 steps from 0 up to 2 and back down again.
+| Experiment name  | Description | Git branch |
+|------------------|-------------|-----------------|
+| OID (O)           | Uses OID to design the full input (60 min steps)    | Experiment-CadBane |
+| Random (R)        | Randomly chooses a new input level (60 min steps) | Experiment-Ventress |
+| Designed 13 (D13) | 13 input steps rising from minimum to maximum and back down again | Experiment-MazKanata |
+| Designed 61 (D61) | 61 input steps rising from minimum to maximum and back down again | Experiment-Biggs |
+| Pulse (P)         | 10 minute maximum input pulse every hour, otherwise zero galactose | Experiment-Lobot |
+| Step 60 (S60)     | Alternate maximum and minimum galactose input for 6 hour periods | Experiment-Hondo |
+| Step 1 (S1)       | Alternate maximum and minimum galactose input for 1 hour periods | Experiment-Phasma |
 
 In each run the initial conditions are randomly chosen in the range 0.1 x truth to 10 x truth. The random distribution is an even distribution in the log scale, so half the distribution is in range [truth .. 10 x truth] and half in the range [0.1 x truth .. truth].
 
-TODO: Put in some example inputs.
+## Examples of input
+
+The following graphs show example inputs used for the various experiments. For the OID and random experiment
+the input is different for each run.  For the other experiments the same input is used for each run.
+
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(knitr)
+
+foo <- read.csv('../data/exampleInputs/CadBaneInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("Example OID input")
+
+foo <- read.csv('../data/exampleInputs/VentreeInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("Example random input")
+
+foo <- read.csv('../data/exampleInputs/BiggsInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("D61 input")
+
+foo <- read.csv('../data/exampleInputs/MazKanataInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("D13 input")
+
+foo <- read.csv('../data/exampleInputs/LobotInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("Pulse input")
+
+foo <- read.csv('../data/exampleInputs/HondoInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("Step 60 input")
+
+foo <- read.csv('../data/exampleInputs/PhasmaInputExample.dat',col.names=c('t','u'),header=FALSE)
+ggplot(data=foo,aes(x=t,y=u)) + geom_line() + ggtitle("Step 1 input")
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 
 trueValues = data.frame( param=c("alpha1","Vm1","h1","Km1","d1","alpha2","d2","Kf","Kb"),
                          trueValue=c(3.3120e-05,0.0414,    1.89,   0.0368, 0.03,   0.01,   0.0100, 0.002, 0.0023) )
@@ -46,23 +81,23 @@ load_experiment_data <- function(filename) {
   
   data <- data %>% mutate( runName = gsub('.dat','',filename))
   exptName <- filename
-  exptName <- gsub('CadBane',      'O',    exptName)
-  exptName <- gsub('Ventress',     'R',    exptName)
-  exptName <- gsub('Biggs',        'D61',  exptName)
-  exptName <- gsub('Lobot',        'D13',  exptName)
-  exptName <- gsub('MazKanata',    'P',    exptName)
-  exptName <- gsub('Phasma',       'S1',   exptName)
-  exptName <- gsub('Hondo',        'S6',   exptName)
+  exptName <- gsub('.*CadBane.*',   'O',    exptName)
+  exptName <- gsub('.*Ventress.*',  'R',    exptName)
+  exptName <- gsub('.*Biggs.*',     'D61',  exptName)
+  exptName <- gsub('.*Lobot.*',     'P',  exptName)
+  exptName <- gsub('.*MazKanata.*', 'D13',    exptName)
+  exptName <- gsub('.*Phasma.*',    'S1',   exptName)
+  exptName <- gsub('.*Hondo.*',     'S6',   exptName)
   
-  filename <- gsub('CadBane-',     'OID 1 Loop (CadBane)-', filename)
-  filename <- gsub('Ventress',     'Random (Ventress)',     filename)
-  filename <- gsub('Biggs',        'Designed 61 (Biggs)',   filename)
-  filename <- gsub('Lobot',        'Designed 13 (Lobot)',   filename)
-  filename <- gsub('MazKanata',    'Pulse  (MaxKanata)',    filename)
-  filename <- gsub('Phasma',       'Steps 1 hour (Phasma)', filename)
-  filename <- gsub('Hondo',        'Steps 6 hour (Hondo)',  filename)
-  data <- data %>% mutate( exptName = gsub('-.*','',exptName))
-  data <- data %>% mutate( exptLabel = gsub('-.*','',filename))
+  filename <- gsub('.*CadBane.*',      'OID 1 Loop (CadBane)', filename)
+  filename <- gsub('.*Ventress.*',     'Random (Ventress)',     filename)
+  filename <- gsub('.*Biggs.*',        'Designed 61 (Biggs)',   filename)
+  filename <- gsub('.*Lobot.*',        'Designed 13 (Lobot)',   filename)
+  filename <- gsub('.*MazKanata.*',    'Pulse  (MaxKanata)',    filename)
+  filename <- gsub('.*Phasma.*',       'Steps 1 hour (Phasma)', filename)
+  filename <- gsub('.*Hondo.*',        'Steps 6 hour (Hondo)',  filename)
+  data <- data %>% mutate( exptName = exptName)
+  data <- data %>% mutate( exptLabel = filename)
   
   return(data)
 }
@@ -70,7 +105,13 @@ load_experiment_data <- function(filename) {
 
 ```{r echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 # Get the data files.
-files <- c(list.files(pattern='CadBane.*dat'),list.files(pattern='Ventress.*dat'),list.files(pattern='Biggs.*dat'),list.files(pattern='Lobot.*dat'),list.files(pattern='MazKanata.*dat'),list.files(pattern='Phasma.*dat'),list.files(pattern='Hondo.*dat'))
+files <- c(list.files(path='../data',pattern='CadBane.*dat',   full.names = TRUE),
+           list.files(path='../data',pattern='Ventress.*dat',  full.names = TRUE),
+           list.files(path='../data',pattern='Biggs.*dat',     full.names = TRUE),
+           list.files(path='../data',pattern='Lobot.*dat',     full.names = TRUE),
+           list.files(path='../data',pattern='MazKanata.*dat', full.names = TRUE),
+           list.files(path='../data',pattern='Phasma.*dat',    full.names = TRUE),
+           list.files(path='../data',pattern='Hondo.*dat',     full.names = TRUE))
 
 # Read in each file, convert to a data frame and merge into one dataframe
 data <- lapply(files, load_experiment_data)
@@ -96,8 +137,6 @@ kable(d)
 
 The final fitted parameters for each method after 60 hours of experiment.
 
-TODO: The y-axis for some of these need not values.
-
 ```{r echo=FALSE}
 d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 ) %>% 
      select(exptName, param, trueValue, value) 
@@ -106,7 +145,60 @@ ggplot(data=d, aes(x=exptName,y=value)) +
   geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y") + scale_y_log10() +
   geom_hline(aes(yintercept=trueValue), color='red')
 ```
-Optimal Input Design (OID) is the best overall.
+
+The y-axis are poorly labelled so here we plot each parameter individually so we get better 
+control over the axis labelling:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'alpha1') %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10() +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("alpha1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'd1') %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0.01,0.10,0.01)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("d1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'h1') %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0.4,4,0.5)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("h1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'Km1') %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0.00,0.2,0.02)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("Km1: Final fitted values")
+```
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param == 'Vm1') %>% 
+     select(exptName, param, trueValue, value) 
+
+ggplot(data=d, aes(x=exptName,y=value)) + 
+  geom_boxplot(alpha=0) + scale_y_log10(breaks=seq(0.02,0.10,0.01)) +
+  geom_hline(aes(yintercept=trueValue), color='red') +
+  ggtitle("Vm1: Final fitted values")
+```
+
 
 Focusing on just OID and Random to zoom in a little more:
 
@@ -160,15 +252,44 @@ ggplot(data=d, aes(x=exptName,y=value)) +
   geom_boxplot(alpha=0) + facet_wrap( ~ param, scales = "free_y")
 ```
 
+## Normalised squared error over all parameters except alpha
+
+Dividing the estimated parameter value by the true parameter value, summing the squared errors and then dividing by the number of data points gives the following graphs for each parameter (ignoring alpha1):
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param != 'alpha1') %>% 
+     select(exptName, param, trueValue, value) %>%
+     mutate(normValue=value/trueValue) %>%
+     mutate(squaredError=(normValue-value)^2) %>% 
+     group_by(param,exptName) %>%
+     summarize(error=sum(squaredError)/n())
+
+ggplot(data=d, aes(x=exptName,y=error,group=1)) + 
+  geom_line() + facet_wrap( ~ param, scales = "free_y") 
+```
+
+Combining these into a single graph (just using addition) gives:
+
+```{r echo=FALSE}
+d <- data %>% filter(type == 'PARAM_FIT' & hour == 60 & param != 'alpha1') %>% 
+     select(exptName, param, trueValue, value) %>%
+     mutate(normValue=value/trueValue) %>%
+     mutate(squaredError=(normValue-value)^2) %>% 
+     group_by(exptName) %>%
+     summarize(error=sum(squaredError)/n())
+
+ggplot(data=d, aes(x=exptName,y=error,group=1)) + geom_line()  
+```
+
 
 ## Code and data
 
-TODO: Add references to the source code and the data.
+The github repository containing the data and the processing files is:
 
-All experiments are in git repository: git@github.com:csynbiosys/AMIGO2R2016b.git
+* `https://github.com/csynbiosys/OID_In_Silico_Experiments`
 
-The random experiment is branch Experiment-Ventress commit 7227eaa63069ff921a48764fa8bd12dc6e2a2ec3.
+The `README.md` file in that repository also contains references to the git repositories 
+and versions of the code used to produce the data.
 
-The OID experiment is branch Experiment-CadBane commit f475047ece093b66ed23b66b701dd6565cfa6c69.
 
 
