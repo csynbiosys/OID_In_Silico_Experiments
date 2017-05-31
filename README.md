@@ -11,7 +11,7 @@ Essentially two sets of experiments were carried out:
 
 Several different approaches to designing the experiment input where tried.  These are described in the table below:
 
-| Experiment name | Description | Git hub branch |
+| Experiment name | Description | Git branch |
 |-----------------|-------------|-----------------|
 | OID         | Uses OID to design the full input (60 min steps)    | Experiment-CadBane |
 | Random      | Randomly chooses a new input level (60 min steps) | Experiment-Ventress |
